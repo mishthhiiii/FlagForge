@@ -1,0 +1,33 @@
+{
+  "name": "flagforge-agents",
+  "version": "1.0.0",
+  "description": "AI Agent orchestration system for FlagForge",
+  "private": true,
+  "type": "module",
+  "main": "dist/src/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/src/index.js",
+    "agent": "tsx src/index.ts",
+    "agent:plan": "tsx src/index.ts plan",
+    "agent:execute": "tsx src/index.ts execute",
+    "agent:inspect": "tsx src/index.ts inspect",
+    "agent:schedule": "tsx src/index.ts schedule",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "node-cron": "^3.0.3",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "@types/node-cron": "^3.0.11",
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "FlagForge",
+  "description": "FlagForge is a premium SaaS Feature Flag Management Platform featuring robust controls, targeting rules, environment metrics, and interactive analytics dashboards.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

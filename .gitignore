@@ -1,0 +1,16 @@
+# Agent system
+node_modules/
+dist/
+.env
+memory/data/*.json
+memory/data/reports/
+!memory/data/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp

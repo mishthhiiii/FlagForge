@@ -1,0 +1,114 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  passwordHash String
+  name         String
+  projects     Project[]
+  auditLogs    AuditLog[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Project {
+  id           String        @id @default(uuid())
+  name         String
+  key          String        @unique
+  description  String?
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  environments Environment[]
+  flags        FeatureFlag[]
+  auditLogs    AuditLog[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Environment {
+  id         String                 @id @default(uuid())
+  name       String                 // e.g., Development, Staging, Production
+  key        String                 // e.g., dev, staging, prod
+  sdkKey     String                 @unique // Token used by SDKs to fetch flags
+  projectId  String
+  project    Project                @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  flagStates EnvironmentFlagState[]
+  createdAt  DateTime               @default(now())
+  updatedAt  DateTime               @updatedAt
+
+  @@unique([projectId, key])
+}
+
+enum FlagType {
+  BOOLEAN
+  MULTIVARIATE
+  JSON
+}
+
+model FeatureFlag {
+  id           String                 @id @default(uuid())
+  name         String
+  key          String                 // unique within a project, e.g. "new-billing-flow"
+  description  String?
+  type         FlagType               @default(BOOLEAN)
+  projectId    String
+  project      Project                @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  flagStates   EnvironmentFlagState[]
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+
+  @@unique([projectId, key])
+}
+
+model EnvironmentFlagState {
+  id            String      @id @default(uuid())
+  flagId        String
+  flag          FeatureFlag @relation(fields: [flagId], references: [id], onDelete: Cascade)
+  environmentId String
+  environment   Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+  enabled       Boolean     @default(false)
+  
+  // The value returned if enabled and no targeting rules match
+  defaultValue  String      // String representation, e.g., "true", "v1", "{\"color\":\"red\"}"
+
+  // Targeting rules represented as a JSON array of targeting conditions and percentage rollouts
+  // Schema for rules JSON:
+  // [
+  //   {
+  //     "id": "rule-1",
+  //     "name": "Beta Users Only",
+  //     "conditions": [{ "attribute": "email", "operator": "ENDS_WITH", "value": "@company.com" }],
+  //     "serveValue": "true"
+  //   },
+  //   {
+  //     "id": "rule-2",
+  //     "name": "50% Rollout",
+  //     "rollout": { "bucketBy": "userId", "percentage": 50 },
+  //     "serveValue": "true"
+  //   }
+  // ]
+  rules         Json        @default("[]")
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([flagId, environmentId])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  action    String   // e.g., "CREATE_FLAG", "UPDATE_FLAG_STATE", "DELETE_ENVIRONMENT"
+  details   String   // JSON string or summary of changes
+  createdAt DateTime @default(now())
+}
