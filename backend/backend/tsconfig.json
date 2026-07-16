@@ -4,11 +4,18 @@
     "module": "CommonJS",
     "rootDir": "./src",
     "outDir": "./dist",
+
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+
     "strict": false,
-    "skipLibCheck": false,
-    "resolveJsonModule": true
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+
+    "resolveJsonModule": true,
+
+    "types": ["node"],
+    "lib": ["ES2022"]
   },
   "include": ["src/**/*"]
 }
