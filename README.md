@@ -22,8 +22,7 @@ FlagForge is an AI-powered feature flag management platform that enables enginee
 
 <br>
 
-<img src="./preview(2).png" alt="FlagForge Preview" width="100%">
-
+<img src="preview%20(2).png" alt="FlagForge Preview" width="100%">
 <br>
 
 ## 🚀 Live Demo
