@@ -33,5 +33,6 @@ router.get('/:id/recommendation', flagController.getFlagRecommendation);
 
 // GET /flags/audit/logs - Retrieve historical audit trail
 router.get('/audit/logs', flagController.getAuditLogs);
+router.get('/audit-logs', flagController.getAuditLogs);
 
 export default router;

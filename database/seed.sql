@@ -40,13 +40,13 @@ INSERT INTO rollout_metrics (id, flag_id, error_rate, response_time, api_failure
 -- 4. Insert AI Recommendations (Decision-Support Records)
 INSERT INTO ai_recommendations (id, flag_id, risk_score, confidence_score, recommendation, reason, created_at) VALUES
 (1, 1, 18, 92, 'Continue', 'Error rate is stable at 0.48% with average response time of 125ms. Rollout can safely proceed to next tier.', '2026-08-18 12:05:00'),
-(2, 2, 28, 88, 'Continue', 'Metrics within acceptable bounds for Testing environment. Monitor API failures if scaling above 80%.', '2026-08-18 11:05:00'),
-(3, 3, 82, 91, 'Pause', 'Error rate increased from 1% to 8.20% and API failures spiked to 89 requests in last measurement window.', '2026-08-18 10:15:00');
+(2, 2, 28, 88, 'Continue', 'Metrics within acceptable bounds for Staging environment. Monitor API failures if scaling above 80%.', '2026-08-18 11:05:00'),
+(3, 3, 82, 91, 'Pause', 'Error rate has reached 8.2%, so disabling this feature is recommended until stability improves.', '2026-08-18 10:15:00');
 
 -- 5. Insert Audit Logs
 INSERT INTO audit_logs (id, flag_id, user_id, action, timestamp) VALUES
 (1, 1, 1, 'Created feature flag ab-test-hero-cta in Production at 0% rollout', '2026-08-10 10:00:00'),
 (2, 1, 1, 'Updated rollout percentage to 50% for ab-test-hero-cta', '2026-08-15 14:30:00'),
-(3, 2, 2, 'Created feature flag ai-code-generation in Testing at 75% rollout', '2026-08-12 11:30:00'),
+(3, 2, 2, 'Created feature flag ai-code-generation in Staging at 75% rollout', '2026-08-12 11:30:00'),
 (4, 3, 2, 'Created feature flag stripe-billing-v3 in Production at 10% rollout', '2026-08-14 14:00:00'),
 (5, 3, 3, 'Paused flag stripe-billing-v3 following AI risk alert of 82/100', '2026-08-17 16:45:00');
