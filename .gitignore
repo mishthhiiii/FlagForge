@@ -1,16 +1,10 @@
-# Agent system
 node_modules/
+build/
 dist/
-.env
-memory/data/*.json
-memory/data/reports/
-!memory/data/.gitkeep
-
-# OS
+coverage/
 .DS_Store
-Thumbs.db
-
-# IDE
-.idea/
-.vscode/
-*.swp
+*.log
+.env*
+!.env.example
+__pycache__/
+*.py[cod]

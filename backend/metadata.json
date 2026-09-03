@@ -1,6 +1,0 @@
-{
-  "name": "FlagForge",
-  "description": "Feature Flag Management Platform where developers can create, manage, and evaluate feature flags across Development, Staging, and Production environments.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

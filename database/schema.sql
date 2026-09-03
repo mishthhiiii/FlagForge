@@ -1,81 +1,124 @@
-/**
- * FlagForge Database Schema (MySQL)
- */
+-- =============================================================================
+-- FlagForge Database Schema (MySQL)
+-- Academic Final-Year Project: AI-Assisted Feature Flag Management Platform
+-- =============================================================================
 
 CREATE DATABASE IF NOT EXISTS flagforge_db;
 USE flagforge_db;
 
--- Users table
-CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    role VARCHAR(50) NOT NULL DEFAULT 'developer',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- -----------------------------------------------------------------------------
+-- 1. Users Table
+-- Stores registered developers and engineers who manage feature flags
+-- -----------------------------------------------------------------------------
+DROP TABLE IF EXISTS audit_logs;
+DROP TABLE IF EXISTS prediction_history;
+DROP TABLE IF EXISTS ai_recommendations;
+DROP TABLE IF EXISTS rollout_metrics;
+DROP TABLE IF EXISTS feature_flags;
+DROP TABLE IF EXISTS users;
 
--- Projects table
-CREATE TABLE IF NOT EXISTS projects (
+CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    project_key VARCHAR(100) NOT NULL UNIQUE,
-    description TEXT,
-    created_by INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- Environments table
-CREATE TABLE IF NOT EXISTS environments (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    project_id INT NOT NULL,
     name VARCHAR(100) NOT NULL,
-    env_key VARCHAR(100) NOT NULL,
+    email VARCHAR(191) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL COMMENT 'Bcrypt hashed password',
+    role ENUM('Admin', 'Developer', 'Viewer') NOT NULL DEFAULT 'Developer',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY uq_project_env (project_id, env_key),
-    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    INDEX idx_users_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Feature Flags table
-CREATE TABLE IF NOT EXISTS feature_flags (
+-- -----------------------------------------------------------------------------
+-- 2. Feature Flags Table
+-- Core feature flag definitions, status, target environment, and rollout percentage
+-- -----------------------------------------------------------------------------
+CREATE TABLE feature_flags (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    project_id INT NOT NULL,
-    flag_key VARCHAR(150) NOT NULL,
-    name VARCHAR(255) NOT NULL,
+    user_id INT NOT NULL,
+    name VARCHAR(191) NOT NULL UNIQUE COMMENT 'Unique alphanumeric identifier / flag name',
     description TEXT,
-    flag_type VARCHAR(50) NOT NULL DEFAULT 'boolean',
-    is_enabled TINYINT(1) NOT NULL DEFAULT 0,
+    status ENUM('Draft', 'Active', 'Paused', 'Archived') NOT NULL DEFAULT 'Draft',
+    rollout_percentage INT NOT NULL DEFAULT 0,
+    environment ENUM('Development', 'Testing', 'Staging', 'Production') NOT NULL DEFAULT 'Development',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uq_project_flag (project_id, flag_key),
-    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    CONSTRAINT chk_rollout_pct CHECK (rollout_percentage >= 0 AND rollout_percentage <= 100),
+    CONSTRAINT fk_flags_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_flags_environment (environment),
+    INDEX idx_flags_status (status),
+    INDEX idx_flags_user (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Flag Rules (Rollout rules per environment)
-CREATE TABLE IF NOT EXISTS flag_rules (
+-- -----------------------------------------------------------------------------
+-- 3. Rollout Metrics Table
+-- Telemetry captured during feature flag rollout for AI evaluation
+-- -----------------------------------------------------------------------------
+CREATE TABLE rollout_metrics (
     id INT AUTO_INCREMENT PRIMARY KEY,
     flag_id INT NOT NULL,
-    environment_id INT NOT NULL,
-    is_enabled TINYINT(1) NOT NULL DEFAULT 0,
-    rollout_percentage INT NOT NULL DEFAULT 100,
-    target_users TEXT,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uq_flag_env (flag_id, environment_id),
-    FOREIGN KEY (flag_id) REFERENCES feature_flags(id) ON DELETE CASCADE,
-    FOREIGN KEY (environment_id) REFERENCES environments(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    error_rate DECIMAL(5,2) NOT NULL DEFAULT 0.00 COMMENT 'Percentage 0.00 - 100.00%',
+    response_time INT NOT NULL DEFAULT 0 COMMENT 'Latency in milliseconds (P95/P99)',
+    api_failures INT NOT NULL DEFAULT 0 COMMENT 'Number of failed API requests in window',
+    user_adoption INT NOT NULL DEFAULT 0 COMMENT 'Active user adoption count or percentage',
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_metrics_flag FOREIGN KEY (flag_id) REFERENCES feature_flags(id) ON DELETE CASCADE,
+    INDEX idx_metrics_flag_time (flag_id, timestamp)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Audit Logs
-CREATE TABLE IF NOT EXISTS audit_logs (
+-- -----------------------------------------------------------------------------
+-- 4. AI Recommendations Table
+-- Decision-support recommendations generated by the Python heuristic engine
+-- -----------------------------------------------------------------------------
+CREATE TABLE ai_recommendations (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    action VARCHAR(100) NOT NULL,
-    entity_type VARCHAR(50) NOT NULL,
-    entity_id INT,
-    details TEXT,
+    flag_id INT NOT NULL,
+    risk_score INT NOT NULL COMMENT 'Calculated risk score 0 - 100',
+    confidence_score INT NOT NULL COMMENT 'Statistical confidence 0 - 100',
+    recommendation ENUM('Continue', 'Pause', 'Disable') NOT NULL,
+    reason TEXT NOT NULL COMMENT 'Explainable reason based on threshold/trend analysis',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    CONSTRAINT chk_risk_score CHECK (risk_score >= 0 AND risk_score <= 100),
+    CONSTRAINT chk_conf_score CHECK (confidence_score >= 0 AND confidence_score <= 100),
+    CONSTRAINT fk_recommendations_flag FOREIGN KEY (flag_id) REFERENCES feature_flags(id) ON DELETE CASCADE,
+    INDEX idx_recommendations_flag (flag_id),
+    INDEX idx_recommendations_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------------------------------
+-- 5. Audit Logs Table
+-- Immutable history tracking developer interventions and flag mutations
+-- -----------------------------------------------------------------------------
+CREATE TABLE audit_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    flag_id INT NULL,
+    user_id INT NOT NULL,
+    action VARCHAR(255) NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_audit_flag FOREIGN KEY (flag_id) REFERENCES feature_flags(id) ON DELETE SET NULL,
+    CONSTRAINT fk_audit_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_audit_user (user_id),
+    INDEX idx_audit_timestamp (timestamp)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------------------------------
+-- 6. Prediction History Table
+-- Telemetry snapshots and AI decision-support history for continuous ML refinement
+-- -----------------------------------------------------------------------------
+CREATE TABLE prediction_history (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    flag_id INT NULL,
+    error_rate FLOAT NOT NULL DEFAULT 0.0,
+    response_time INT NOT NULL DEFAULT 0,
+    api_failures INT NOT NULL DEFAULT 0,
+    user_adoption FLOAT NOT NULL DEFAULT 0.0,
+    cpu_usage FLOAT NOT NULL DEFAULT 0.0,
+    memory_usage FLOAT NOT NULL DEFAULT 0.0,
+    rollout_percentage INT NOT NULL DEFAULT 0,
+    recommendation VARCHAR(20) NOT NULL,
+    risk_score INT NOT NULL,
+    reliability_score INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_pred_history_flag FOREIGN KEY (flag_id) REFERENCES feature_flags(id) ON DELETE SET NULL,
+    INDEX idx_pred_history_flag (flag_id),
+    INDEX idx_pred_history_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+

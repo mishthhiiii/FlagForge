@@ -1,39 +1,52 @@
+-- =============================================================================
+-- FlagForge Seed Data (MySQL)
+-- Realistic mock dataset for development, testing, and interview demonstration
+-- =============================================================================
+
 USE flagforge_db;
 
--- Seed default user (password: "password123")
-INSERT INTO users (id, name, email, password_hash, role) VALUES
-(1, 'Mishthi Chaurasia', 'mishthi@flagforge.dev', 'scrypt:32768:8:1$yXy0Z...$hashplaceholder', 'admin'),
-(2, 'Dev Lead', 'lead@flagforge.dev', 'scrypt:32768:8:1$yXy0Z...$hashplaceholder', 'developer');
+-- 1. Insert Initial Developers (Password: "password123" hashed with bcrypt)
+INSERT INTO users (id, name, email, password, role, created_at) VALUES
+(1, 'Project Admin', 'admin@flagforge.local', '$2a$10$abcdefghijklmnopqrstuuSampleHashedBcryptPassword12345', 'Admin', '2026-08-01 09:00:00'),
+(2, 'Developer', 'developer@flagforge.local', '$2a$10$abcdefghijklmnopqrstuuSampleHashedBcryptPassword12345', 'Developer', '2026-08-02 10:15:00'),
+(3, 'Viewer', 'viewer@flagforge.local', '$2a$10$abcdefghijklmnopqrstuuSampleHashedBcryptPassword12345', 'Viewer', '2026-08-02 11:00:00');
 
--- Seed default project
-INSERT INTO projects (id, name, project_key, description, created_by) VALUES
-(1, 'FlagForge Core', 'flagforge-core', 'Main application feature flag configurations', 1);
+-- 2. Insert Feature Flags
+INSERT INTO feature_flags (id, user_id, name, description, status, rollout_percentage, environment, created_at, updated_at) VALUES
+(1, 1, 'ab-test-hero-cta', 'Evaluating conversion rate on indigo primary CTA versus emerald CTA on landing page.', 'Active', 50, 'Production', '2026-08-10 10:00:00', '2026-08-15 14:30:00'),
+(2, 2, 'ai-code-generation', 'Assisted code generation backend endpoint powered by contextual models.', 'Active', 75, 'Staging', '2026-08-12 11:30:00', '2026-08-16 09:15:00'),
+(3, 3, 'stripe-billing-v3', 'Migration to multi-currency Stripe Billing API v3 webhooks.', 'Paused', 10, 'Production', '2026-08-14 14:00:00', '2026-08-17 16:45:00'),
+(4, 1, 'dashboard-analytics-v2', 'High-throughput Recharts visualization for edge latency monitoring.', 'Active', 100, 'Development', '2026-08-15 16:00:00', '2026-08-18 11:20:00'),
+(5, 2, 'realtime-websocket-bus', 'Low latency bidirectional event streaming layer for instant flag invalidation.', 'Draft', 0, 'Development', '2026-08-18 08:30:00', '2026-08-18 08:30:00');
 
--- Seed default environments
-INSERT INTO environments (id, project_id, name, env_key) VALUES
-(1, 1, 'Development', 'development'),
-(2, 1, 'Testing', 'testing'),
-(3, 1, 'Staging', 'staging'),
-(4, 1, 'Production', 'production');
+-- 3. Insert Rollout Metrics (Telemetry time-series)
+INSERT INTO rollout_metrics (id, flag_id, error_rate, response_time, api_failures, user_adoption, timestamp) VALUES
+-- Flag 1: ab-test-hero-cta (Healthy metrics)
+(1, 1, 0.45, 120, 2, 45, '2026-08-18 10:00:00'),
+(2, 1, 0.52, 118, 3, 50, '2026-08-18 11:00:00'),
+(3, 1, 0.48, 125, 1, 52, '2026-08-18 12:00:00'),
 
--- Seed feature flags
-INSERT INTO feature_flags (id, project_id, flag_key, name, description, flag_type, is_enabled) VALUES
-(1, 1, 'ab-test-hero-cta-button', 'A/B Hero CTA Button Color', 'Tests dynamic indigo vs emerald conversion CTA', 'boolean', 1),
-(2, 1, 'ai-code-generation-v2', 'AI Code Generator v2 Engine', 'Gemini 2.5 Flash assisted rollout engine for intelligent targeting', 'boolean', 1),
-(3, 1, 'billing-engine-v3-stripe', 'Stripe Billing Engine Migration', 'New automated payment provider integration', 'boolean', 0),
-(4, 1, 'custom-dashboard-widgets', 'Customizable User Analytics Widgets', 'Allows end-users to drag and order custom workspace widgets', 'boolean', 1),
-(5, 1, 'realtime-notification-stream', 'Realtime WebSocket Notification Bus', 'Sub-10ms flag propagation notification bus', 'boolean', 1);
+-- Flag 2: ai-code-generation (Healthy metrics)
+(4, 2, 1.10, 310, 8, 70, '2026-08-18 10:00:00'),
+(5, 2, 1.25, 305, 9, 75, '2026-08-18 11:00:00'),
 
--- Seed flag rules across environments
-INSERT INTO flag_rules (flag_id, environment_id, is_enabled, rollout_percentage) VALUES
-(1, 1, 1, 100), (1, 2, 1, 100), (1, 3, 1, 50), (1, 4, 1, 25),
-(2, 1, 1, 100), (2, 2, 1, 100), (2, 3, 1, 75), (2, 4, 1, 50),
-(3, 1, 1, 100), (3, 2, 1, 50), (3, 3, 0, 0), (3, 4, 0, 0),
-(4, 1, 1, 100), (4, 2, 1, 100), (4, 3, 1, 100), (4, 4, 1, 100),
-(5, 1, 1, 100), (5, 2, 1, 100), (5, 3, 1, 80), (5, 4, 0, 0);
+-- Flag 3: stripe-billing-v3 (Degraded metrics -> triggered Pause recommendation)
+(6, 3, 4.80, 480, 34, 10, '2026-08-18 09:00:00'),
+(7, 3, 8.20, 750, 89, 10, '2026-08-18 10:00:00'),
 
--- Seed audit logs
-INSERT INTO audit_logs (user_id, action, entity_type, entity_id, details) VALUES
-(1, 'CREATE_FLAG', 'feature_flag', 1, 'Created feature flag ab-test-hero-cta-button'),
-(1, 'UPDATE_ROLLOUT', 'flag_rule', 1, 'Updated Production rollout percentage to 25%'),
-(2, 'TOGGLE_FLAG', 'feature_flag', 3, 'Disabled billing-engine-v3-stripe in Production');
+-- Flag 4: dashboard-analytics-v2 (Stable)
+(8, 4, 0.15, 85, 0, 100, '2026-08-18 12:00:00');
+
+-- 4. Insert AI Recommendations (Decision-Support Records)
+INSERT INTO ai_recommendations (id, flag_id, risk_score, confidence_score, recommendation, reason, created_at) VALUES
+(1, 1, 18, 92, 'Continue', 'Error rate is stable at 0.48% with average response time of 125ms. Rollout can safely proceed to next tier.', '2026-08-18 12:05:00'),
+(2, 2, 28, 88, 'Continue', 'Metrics within acceptable bounds for Testing environment. Monitor API failures if scaling above 80%.', '2026-08-18 11:05:00'),
+(3, 3, 82, 91, 'Pause', 'Error rate increased from 1% to 8.20% and API failures spiked to 89 requests in last measurement window.', '2026-08-18 10:15:00');
+
+-- 5. Insert Audit Logs
+INSERT INTO audit_logs (id, flag_id, user_id, action, timestamp) VALUES
+(1, 1, 1, 'Created feature flag ab-test-hero-cta in Production at 0% rollout', '2026-08-10 10:00:00'),
+(2, 1, 1, 'Updated rollout percentage to 50% for ab-test-hero-cta', '2026-08-15 14:30:00'),
+(3, 2, 2, 'Created feature flag ai-code-generation in Testing at 75% rollout', '2026-08-12 11:30:00'),
+(4, 3, 2, 'Created feature flag stripe-billing-v3 in Production at 10% rollout', '2026-08-14 14:00:00'),
+(5, 3, 3, 'Paused flag stripe-billing-v3 following AI risk alert of 82/100', '2026-08-17 16:45:00');

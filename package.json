@@ -1,35 +1,37 @@
 {
-  "name": "flagforge-agents",
-  "version": "1.0.0",
-  "description": "AI Agent orchestration system for FlagForge",
+  "name": "flagforge",
   "private": true,
+  "version": "0.0.0",
   "type": "module",
-  "main": "dist/src/index.js",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsx src/index.ts",
-    "start": "node dist/src/index.js",
-    "agent": "tsx src/index.ts",
-    "agent:plan": "tsx src/index.ts plan",
-    "agent:execute": "tsx src/index.ts execute",
-    "agent:inspect": "tsx src/index.ts inspect",
-    "agent:schedule": "tsx src/index.ts schedule",
-    "typecheck": "tsc --noEmit"
+    "dev": "vite --port=3000 --host=0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview",
+    "server": "node backend/server.js",
+    "clean": "rm -rf dist server.js",
+    "lint": "node --check backend/server.js && node --check backend/app.js"
   },
   "dependencies": {
-    "dotenv": "^16.4.5",
-    "node-cron": "^3.0.3",
-    "zod": "^3.22.4"
+    "@tailwindcss/vite": "^4.1.14",
+    "@vitejs/plugin-react": "^5.0.4",
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.3",
+    "lucide-react": "^0.546.0",
+    "mysql2": "^3.24.3",
+    "react": "^19.0.1",
+    "react-dom": "^19.0.1",
+    "vite": "^6.2.3"
   },
   "devDependencies": {
-    "@types/express": "^5.0.6",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^20.19.43",
-    "@types/node-cron": "^3.0.11",
-    "tsx": "^4.7.1",
-    "typescript": "^5.3.3"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "@types/node": "^22.14.0",
+    "autoprefixer": "^10.4.21",
+    "esbuild": "^0.25.0",
+    "tailwindcss": "^4.1.14",
+    "tsx": "^4.21.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.3",
+    "@types/express": "^4.17.21"
   }
 }
