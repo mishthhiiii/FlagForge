@@ -4,9 +4,13 @@
 
 ### AI-Powered Feature Flag Management Platform
 
-Safely control software rollouts across **Development, Staging, and Production** with environment-based feature flags, AI-assisted rollout insights, role-based access control, and complete audit visibility.
+Manage feature releases across **Development**, **Staging**, and **Production** using centralized feature flags, AI-assisted rollout recommendations, secure authentication, and complete audit visibility.
 
-<img src="assets/dashboard-preview.png" alt="FlagForge Dashboard" width="100%"/>
+<img src="dashboard-preview.png" alt="FlagForge Dashboard" width="100%"/>
+
+<p>
+  <strong>React • Vite • Express • MySQL • JWT</strong>
+</p>
 
 </div>
 
@@ -14,61 +18,73 @@ Safely control software rollouts across **Development, Staging, and Production**
 
 ## Overview
 
-FlagForge is a full-stack feature flag management platform inspired by modern deployment workflows used by software teams. Instead of redeploying applications for every feature release, FlagForge enables controlled rollouts through centralized feature toggles, environment-based configuration, and deployment risk insights.
+Feature releases shouldn't require redeploying an application every time a feature needs to be enabled or disabled.
 
-The platform combines **React**, **Express**, and **MySQL** to provide a production-style workflow for managing feature releases while maintaining visibility through audit logs and permission-based access.
+**FlagForge** is a full-stack feature flag management platform that allows developers to control feature availability through a centralized dashboard. It provides environment-specific feature management, AI-assisted rollout recommendations, secure role-based authentication, and a complete audit trail of configuration changes.
 
 ---
 
-## Key Features
+## Features
 
-### Environment-Based Feature Management
+<table>
+<tr>
+<td width="50%">
 
-- Separate Development, Staging, and Production environments
-- Independent feature visibility across environments
-- Environment-aware dashboards and metrics
+### Feature Management
 
-### Feature Flag Controls
-
-- Create new feature flags
-- Edit existing configurations
+- Create, edit, and delete feature flags
 - Pause or activate features instantly
-- Delete obsolete flags
-- Adjust rollout percentages in real time
+- Configure rollout percentages
+- Manage feature lifecycle from one dashboard
+
+</td>
+<td width="50%">
+
+### Environment Control
+
+- Development
+- Staging
+- Production
+- Environment-specific feature visibility
+
+</td>
+</tr>
+
+<tr>
+<td>
 
 ### AI Rollout Insights
 
-- Risk score based on rollout health
-- Recommendation-based decision support
-- Environment-specific analysis
-- Developers always retain final control
+- Risk score evaluation
+- Rollout recommendations
+- Environment-aware analysis
+- Human-controlled decisions
 
-### Secure Access
+</td>
+<td>
+
+### Security & Visibility
 
 - JWT Authentication
-- Role-based permissions
-- Admin
-- Developer
-- Viewer
+- Admin, Developer & Viewer roles
+- Complete audit logs
+- Permission-based access
 
-### Audit Visibility
-
-Every important action is recorded, including:
-
-- Feature creation
-- Configuration updates
-- Rollout changes
-- Feature deletion
+</td>
+</tr>
+</table>
 
 ---
 
 ## Dashboard Preview
 
-<img src="assets/dashboard-preview.png" alt="FlagForge Dashboard"/>
+A centralized dashboard for monitoring feature rollouts, switching environments, reviewing AI recommendations, and tracking rollout activity.
+
+<img src="dashboard-preview.png" alt="FlagForge Dashboard"/>
 
 ---
 
-## Tech Stack
+## Technology Stack
 
 | Layer | Technology |
 |--------|------------|
@@ -77,26 +93,26 @@ Every important action is recorded, including:
 | Database | MySQL |
 | Authentication | JWT |
 | Styling | Tailwind CSS |
-| API | REST |
-| Version Control | Git & GitHub |
+| Communication | REST APIs |
 
 ---
 
 ## Architecture
 
 ```text
-                 React + Vite
-                      │
-                      │ REST APIs
-                      ▼
-               Express Backend
-                      │
-      ┌───────────────┼───────────────┐
-      ▼               ▼               ▼
- Feature Flags     Authentication   Audit Logs
-      │
-      ▼
-     MySQL Database
+                React + Vite
+                     │
+                 REST API
+                     │
+                     ▼
+              Express Backend
+                     │
+      ┌──────────────┼──────────────┐
+      ▼              ▼              ▼
+ Feature Flags   Authentication  Audit Logs
+                     │
+                     ▼
+                 MySQL Database
 ```
 
 ---
@@ -105,18 +121,19 @@ Every important action is recorded, including:
 
 ```text
 FlagForge/
-├── assets/
 ├── backend/
-│   ├── app.js
 │   ├── controllers/
 │   ├── middleware/
 │   ├── models/
 │   ├── routes/
 │   ├── services/
+│   ├── app.js
 │   └── server.js
+│
 ├── database/
 │   ├── schema.sql
 │   └── seed.sql
+│
 ├── frontend/
 │   └── src/
 │       ├── components/
@@ -124,6 +141,8 @@ FlagForge/
 │       ├── pages/
 │       ├── services/
 │       └── ...
+│
+├── dashboard-preview.png
 ├── package.json
 ├── vite.config.js
 └── README.md
@@ -133,32 +152,30 @@ FlagForge/
 
 ## Getting Started
 
-### Clone the Repository
+### Clone the repository
 
 ```bash
 git clone https://github.com/mishthhiiii/FlagForge.git
 cd FlagForge
 ```
 
-### Install Dependencies
+### Install dependencies
 
 ```bash
 npm install
 ```
 
-### Configure Environment
+### Configure environment
 
-Create a `.env` file using `.env.example`.
+Create a `.env` file using `.env.example` and configure the required MySQL connection details.
 
-Configure your database credentials before starting the application.
-
-### Run the Project
+### Start the application
 
 ```bash
 npm run dev
 ```
 
-The application runs locally at:
+Open:
 
 ```text
 http://localhost:3000
@@ -184,73 +201,41 @@ http://localhost:3000/health
 
 ---
 
-## Core Workflows
+## How FlagForge Works
 
-### Feature Flag Lifecycle
-
-1. Create a feature flag.
-2. Assign an environment.
-3. Configure rollout percentage.
-4. Activate or pause the rollout.
-5. Monitor risk insights.
-6. Review the audit history.
-
-### Environment Switching
-
-Switching between environments updates:
-
-- Dashboard metrics
-- Live rollout table
-- Risk insights
-- Feature visibility
-
-### AI Rollout Insights
-
-Instead of automatically changing production behavior, FlagForge provides recommendations based on rollout health.
-
-Example recommendations include:
-
-- Continue rollout
-- Pause rollout
-- Disable rollout
-
-The final decision always remains with the developer.
+1. A user signs in using JWT authentication.
+2. The dashboard displays feature flags for the selected environment.
+3. Developers create or update feature configurations.
+4. AI Rollout Insights provide recommendation-based guidance.
+5. Every important action is recorded in the audit log.
+6. Feature availability changes without requiring a new deployment.
 
 ---
 
-## API Overview
+## REST API
 
-| Method | Endpoint | Purpose |
-|---------|----------|---------|
-| POST | `/login` | Authenticate user |
-| GET | `/flags` | Fetch feature flags |
-| POST | `/flags` | Create feature |
-| PATCH | `/flags/:id` | Update feature |
-| DELETE | `/flags/:id` | Delete feature |
-| GET | `/audit` | Fetch audit logs |
-| GET | `/health` | Health check |
+FlagForge uses REST APIs to connect the React frontend with the Express backend for:
+
+- User authentication
+- Feature flag management
+- Environment-based configuration
+- Audit log retrieval
+- Health monitoring
 
 ---
 
-## Design Principles
-
-FlagForge was built around four core principles:
-
-- Controlled feature releases instead of risky deployments.
-- Environment-specific configuration.
-- Transparent audit visibility.
-- Human-controlled AI recommendations.
-
----
-
-## Future Improvements
+## Future Enhancements
 
 - Scheduled feature releases
-- Percentage-based gradual rollouts
+- Gradual percentage-based rollouts
 - Team workspaces
 - Webhook integrations
-- Advanced rollout analytics
+- Additional rollout analytics
 
+---
 
+<div align="center">
 
-**Made by Mishthi Chaurasia**
+### Made with ❤️ by Mishthi Chaurasia
+
+</div>
