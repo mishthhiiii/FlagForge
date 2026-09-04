@@ -1,8 +1,8 @@
 <div align="center">
 
-# FlagForge
+# FlagForge - AI-Powered Feature Flag Management Platform
 
-### AI-Powered Feature Flag Management Platform
+
 
 Manage feature releases across **Development**, **Staging**, and **Production** using centralized feature flags, AI-assisted rollout recommendations, secure authentication, and complete audit visibility.
 
